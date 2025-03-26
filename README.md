@@ -1,4 +1,4 @@
-### Hello There, my name is Pina
+### Hello There, my name is Pina(learning how to use github...)
 
 -🪐 I'm currently working on Billing and Logistics
 
