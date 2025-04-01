@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f4f4f4;
+      margin: 0;
+    }
+    canvas {
+      background: #000;
+      border: 2px solid #fff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scale = 20;
+    const rows = canvas.height / scale;
+    const columns = canvas.width / scale;
+
+    let snake;
+    let apple;
+    let gameInterval;
+
+    function init() {
+      snake = new Snake();
+      apple = new Apple();
+      gameInterval = setInterval(update, 100);
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      snake.update();
+      snake.draw();
+      apple.draw();
+      if (snake.eatApple(apple)) {
+        apple.randomizePosition();
+      }
+      if (snake.collide()) {
+        clearInterval(gameInterval);
+        alert("Game Over");
+        init();
+      }
+    }
+
+    function Snake() {
+      this.body = [{ x: 5, y: 5 }];
+      this.direction = "RIGHT";
+
+      this.update = function() {
+        const head = { ...this.body[0] };
+
+        if (this.direction === "RIGHT") head.x++;
+        if (this.direction === "LEFT") head.x--;
+        if (this.direction === "UP") head.y--;
+        if (this.direction === "DOWN") head.y++;
+
+        this.body.unshift(head);
+        this.body.pop();
+      };
+
+      this.draw = function() {
+        ctx.fillStyle = "#00FF00";
+        this.body.forEach(segment => ctx.fillRect(segment.x * scale, segment.y * scale, scale, scale));
+      };
+
+      this.eatApple = function(apple) {
+        return this.body[0].x === apple.x && this.body[0].y === apple.y;
+      };
+
+      this.collide = function() {
+        if (this.body[0].x < 0 || this.body[0].x >= columns || this.body[0].y < 0 || this.body[0].y >= rows) return true;
+        for (let i = 1; i < this.body.length; i++) {
+          if (this.body[i].x === this.body[0].x && this.body[i].y === this.body[0].y) return true;
+        }
+        return false;
+      };
+    }
+
+    function Apple() {
+      this.randomizePosition = function() {
+        this.x = Math.floor(Math.random() * columns);
+        this.y = Math.floor(Math.random() * rows);
+      };
+      this.draw = function() {
+        ctx.fillStyle = "#FF0000";
+        ctx.fillRect(this.x * scale, this.y * scale, scale, scale);
+      };
+      this.randomizePosition();
+    }
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowUp" && snake.direction !== "DOWN") snake.direction = "UP";
+      if (event.key === "ArrowDown" && snake.direction !== "UP") snake.direction = "DOWN";
+      if (event.key === "ArrowLeft" && snake.direction !== "RIGHT") snake.direction = "LEFT";
+      if (event.key === "ArrowRight" && snake.direction !== "LEFT") snake.direction = "RIGHT";
+    });
+
+    init();
+  </script>
+</body>
+</html>
